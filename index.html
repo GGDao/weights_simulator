@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lootbox Rarity Drop Rate Simulator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .rarity-control {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .rarity-control:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .rarity-control.common {
+            border-left: 5px solid #48bb78;
+        }
+        
+        .rarity-control.rare {
+            border-left: 5px solid #4299e1;
+        }
+        
+        .rarity-control.legendary {
+            border-left: 5px solid #ed8936;
+        }
+        
+        .rarity-control h3 {
+            margin: 0 0 15px 0;
+            color: #2d3748;
+        }
+        
+        .weight-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .weight-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .nft-count {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        .presets {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .preset-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .preset-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .results {
+            background: #f0fff4;
+            border: 2px solid #9ae6b4;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .probability-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .prob-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .prob-card.common {
+            border-top: 4px solid #48bb78;
+        }
+        
+        .prob-card.rare {
+            border-top: 4px solid #4299e1;
+        }
+        
+        .prob-card.legendary {
+            border-top: 4px solid #ed8936;
+        }
+        
+        .prob-percentage {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .prob-label {
+            font-size: 14px;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .visual-bar {
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .bar-fill.common {
+            background: linear-gradient(90deg, #48bb78, #68d391);
+        }
+        
+        .bar-fill.rare {
+            background: linear-gradient(90deg, #4299e1, #63b3ed);
+        }
+        
+        .bar-fill.legendary {
+            background: linear-gradient(90deg, #ed8936, #f6ad55);
+        }
+        
+        .simulation {
+            background: #fffaf0;
+            border: 2px solid #fed7aa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .simulate-btn {
+            background: #ed8936;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .simulate-btn:hover {
+            background: #dd6b20;
+            transform: translateY(-2px);
+        }
+        
+        .simulation-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .sim-result {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Lootbox Rarity Drop Rate Simulator</h1>
+        
+        <div class="presets">
+            <h3>Quick Presets:</h3>
+            <button class="preset-btn" onclick="setPreset('equal')">Equal Weights (1:1:1)</button>
+            <button class="preset-btn" onclick="setPreset('traditional')">Traditional (100:10:1)</button>
+            <button class="preset-btn" onclick="setPreset('moderate')">Moderate (50:20:5)</button>
+            <button class="preset-btn" onclick="setPreset('extreme')">Extreme (1000:50:1)</button>
+        </div>
+        
+        <div class="controls">
+            <div class="rarity-control common">
+                <h3>🟢 Common (Rarity 0)</h3>
+                <label>Weight:</label>
+                <input type="number" id="weight0" class="weight-input" value="1" min="0" oninput="updateCalculations()">
+                <div class="nft-count">
+                    NFT Count: <input type="number" id="count0" value="100" min="0" oninput="updateCalculations()">
+                </div>
+            </div>
+            
+            <div class="rarity-control rare">
+                <h3>🔵 Rare (Rarity 1)</h3>
+                <label>Weight:</label>
+                <input type="number" id="weight1" class="weight-input" value="1" min="0" oninput="updateCalculations()">
+                <div class="nft-count">
+                    NFT Count: <input type="number" id="count1" value="50" min="0" oninput="updateCalculations()">
+                </div>
+            </div>
+            
+            <div class="rarity-control legendary">
+                <h3>🟠 Legendary (Rarity 2)</h3>
+                <label>Weight:</label>
+                <input type="number" id="weight2" class="weight-input" value="1" min="0" oninput="updateCalculations()">
+                <div class="nft-count">
+                    NFT Count: <input type="number" id="count2" value="10" min="0" oninput="updateCalculations()">
+                </div>
+            </div>
+        </div>
+        
+        <div class="results">
+            <h3>📊 Drop Rate Probabilities</h3>
+            
+            <div class="visual-bar">
+                <div class="bar-fill common" id="commonBar">0%</div>
+                <div class="bar-fill rare" id="rareBar" style="width: 0%">0%</div>
+                <div class="bar-fill legendary" id="legendaryBar" style="width: 0%">0%</div>
+            </div>
+            
+            <div class="probability-display">
+                <div class="prob-card common">
+                    <div class="prob-percentage" id="commonProb">33.3%</div>
+                    <div class="prob-label">Common Drop Rate</div>
+                </div>
+                <div class="prob-card rare">
+                    <div class="prob-percentage" id="rareProb">33.3%</div>
+                    <div class="prob-label">Rare Drop Rate</div>
+                </div>
+                <div class="prob-card legendary">
+                    <div class="prob-percentage" id="legendaryProb">33.3%</div>
+                    <div class="prob-label">Legendary Drop Rate</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; color: #718096; font-size: 14px;">
+                Total Weight: <span id="totalWeight">3</span>
+            </div>
+        </div>
+        
+        <div class="simulation">
+            <h3>🎮 Simulate Opens</h3>
+            <p>Test your probabilities with a simulation of lootbox opens:</p>
+            <button class="simulate-btn" onclick="runSimulation()">Simulate 1000 Opens</button>
+            <div class="simulation-results" id="simulationResults"></div>
+        </div>
+    </div>
+
+    <script>
+        function updateCalculations() {
+            const weights = [
+                parseInt(document.getElementById('weight0').value) || 0,
+                parseInt(document.getElementById('weight1').value) || 0,
+                parseInt(document.getElementById('weight2').value) || 0
+            ];
+            
+            const counts = [
+                parseInt(document.getElementById('count0').value) || 0,
+                parseInt(document.getElementById('count1').value) || 0,
+                parseInt(document.getElementById('count2').value) || 0
+            ];
+            
+            // Only include weights for rarities that have NFTs available
+            let totalWeight = 0;
+            const activeWeights = [0, 0, 0];
+            
+            for (let i = 0; i < 3; i++) {
+                if (counts[i] > 0) {
+                    activeWeights[i] = weights[i];
+                    totalWeight += weights[i];
+                }
+            }
+            
+            if (totalWeight === 0) {
+                // No NFTs available
+                document.getElementById('commonProb').textContent = '0%';
+                document.getElementById('rareProb').textContent = '0%';
+                document.getElementById('legendaryProb').textContent = '0%';
+                document.getElementById('totalWeight').textContent = '0';
+                return;
+            }
+            
+            const probabilities = activeWeights.map(w => (w / totalWeight) * 100);
+            
+            // Update probability displays
+            document.getElementById('commonProb').textContent = probabilities[0].toFixed(1) + '%';
+            document.getElementById('rareProb').textContent = probabilities[1].toFixed(1) + '%';
+            document.getElementById('legendaryProb').textContent = probabilities[2].toFixed(1) + '%';
+            document.getElementById('totalWeight').textContent = totalWeight.toString();
+            
+            // Update visual bar
+            updateVisualBar(probabilities);
+        }
+        
+        function updateVisualBar(probabilities) {
+            const commonBar = document.getElementById('commonBar');
+            const rareBar = document.getElementById('rareBar');
+            const legendaryBar = document.getElementById('legendaryBar');
+            
+            // Reset the bar
+            commonBar.style.width = probabilities[0] + '%';
+            rareBar.style.width = probabilities[1] + '%';
+            legendaryBar.style.width = probabilities[2] + '%';
+            
+            commonBar.textContent = probabilities[0] > 5 ? probabilities[0].toFixed(1) + '%' : '';
+            rareBar.textContent = probabilities[1] > 5 ? probabilities[1].toFixed(1) + '%' : '';
+            legendaryBar.textContent = probabilities[2] > 5 ? probabilities[2].toFixed(1) + '%' : '';
+        }
+        
+        function setPreset(type) {
+            switch(type) {
+                case 'equal':
+                    document.getElementById('weight0').value = 1;
+                    document.getElementById('weight1').value = 1;
+                    document.getElementById('weight2').value = 1;
+                    break;
+                case 'traditional':
+                    document.getElementById('weight0').value = 100;
+                    document.getElementById('weight1').value = 10;
+                    document.getElementById('weight2').value = 1;
+                    break;
+                case 'moderate':
+                    document.getElementById('weight0').value = 50;
+                    document.getElementById('weight1').value = 20;
+                    document.getElementById('weight2').value = 5;
+                    break;
+                case 'extreme':
+                    document.getElementById('weight0').value = 1000;
+                    document.getElementById('weight1').value = 50;
+                    document.getElementById('weight2').value = 1;
+                    break;
+            }
+            updateCalculations();
+        }
+        
+        function runSimulation() {
+            const weights = [
+                parseInt(document.getElementById('weight0').value) || 0,
+                parseInt(document.getElementById('weight1').value) || 0,
+                parseInt(document.getElementById('weight2').value) || 0
+            ];
+            
+            const counts = [
+                parseInt(document.getElementById('count0').value) || 0,
+                parseInt(document.getElementById('count1').value) || 0,
+                parseInt(document.getElementById('count2').value) || 0
+            ];
+            
+            // Calculate active weights (only for rarities with NFTs)
+            let totalWeight = 0;
+            const activeWeights = [0, 0, 0];
+            
+            for (let i = 0; i < 3; i++) {
+                if (counts[i] > 0) {
+                    activeWeights[i] = weights[i];
+                    totalWeight += weights[i];
+                }
+            }
+            
+            if (totalWeight === 0) {
+                document.getElementById('simulationResults').innerHTML = '<div style="color: red;">No NFTs available for simulation!</div>';
+                return;
+            }
+            
+            const results = [0, 0, 0];
+            const numSimulations = 1000;
+            
+            // Simulate the lootbox function logic
+            for (let sim = 0; sim < numSimulations; sim++) {
+                const random = Math.floor(Math.random() * totalWeight);
+                let cumulativeWeight = 0;
+                let targetRarity = 0;
+                
+                for (let i = 0; i < 3; i++) {
+                    cumulativeWeight += activeWeights[i];
+                    if (random < cumulativeWeight) {
+                        targetRarity = i;
+                        break;
+                    }
+                }
+                
+                results[targetRarity]++;
+            }
+            
+            // Display results
+            const resultsHtml = `
+                <div class="sim-result">
+                    <strong>Common</strong><br>
+                    ${results[0]}/1000<br>
+                    (${(results[0]/10).toFixed(1)}%)
+                </div>
+                <div class="sim-result">
+                    <strong>Rare</strong><br>
+                    ${results[1]}/1000<br>
+                    (${(results[1]/10).toFixed(1)}%)
+                </div>
+                <div class="sim-result">
+                    <strong>Legendary</strong><br>
+                    ${results[2]}/1000<br>
+                    (${(results[2]/10).toFixed(1)}%)
+                </div>
+            `;
+            
+            document.getElementById('simulationResults').innerHTML = resultsHtml;
+        }
+        
+        // Initialize calculations
+        updateCalculations();
+    </script>
+</body>
+</html>
